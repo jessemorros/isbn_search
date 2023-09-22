@@ -131,6 +131,7 @@ with st.form("gb_isbn_search"):
     submitted = st.form_submit_button("Search")
     if submitted:
         url = 'https://www.googleapis.com/books/v1/volumes?q=isbn:'+isbn
+        hostname = socket.gethostname()
         proxy = socket.gethostbyname(hostname)
         response = requests.get(url,proxies=proxy)
         data = response.json()
