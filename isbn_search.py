@@ -1,7 +1,7 @@
 import streamlit as st
 st.set_page_config(
     page_title="ISBN Search",
-    page_icon="resources/cl_favicon.png",
+    page_icon="cl_favicon.png",
     layout="wide",
     initial_sidebar_state="expanded")
 import streamlit.components.v1 as components
