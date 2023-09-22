@@ -5,9 +5,6 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded")
 import streamlit.components.v1 as components
-import pandas as pd
-import io
-from loc_isbns import loc 
 import requests
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
