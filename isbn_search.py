@@ -10,6 +10,7 @@ from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
 import re 
 import time
+import socket
 
 
 
@@ -130,7 +131,8 @@ with st.form("gb_isbn_search"):
     submitted = st.form_submit_button("Search")
     if submitted:
         url = 'https://www.googleapis.com/books/v1/volumes?q=isbn:'+isbn
-        response = requests.get(url)
+        proxy = socket.gethostbyname(hostname)
+        response = requests.get(url,proxies=proxy)
         data = response.json()
         if 'items' in data:
             if 'title' in data['items'][0]['volumeInfo']:
