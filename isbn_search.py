@@ -132,7 +132,7 @@ with st.form("gb_isbn_search"):
         url = 'https://www.googleapis.com/books/v1/volumes?q=isbn:'+isbn
         response = requests.get(url)
         data = response.json()
-        if data['totalItems'] > 0:
+        if 'items' in data:
             if 'title' in data['items'][0]['volumeInfo']:
                 book_title = data['items'][0]['volumeInfo']['title']
                 st.write('Title: ',book_title)
