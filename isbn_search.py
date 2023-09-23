@@ -138,22 +138,18 @@ with st.form("gb_isbn_search"):
                 book_title = data['items'][0]['volumeInfo']['title']
                 st.write('Title: ',book_title)
             if 'authors' in data['items'][0]['volumeInfo']:
-                author = data['items'][0]['volumeInfo']['authors'] 
+                author = data['items'][0]['volumeInfo']['authors']
                 if len(author) > 1:
                     authors = []
                     for i in author:
                         author_string = i
-                        if re.search(r'(author)|(editor)',author_string):
-                            author_string = re.sub(r'(author)|(editor)','',author_string)
-                            author_string = author_string.strip(" ,")
-                            author_string = author_string.split(',')
-                            authors.append(author_string)
-                    author = '; '.join(authors)
+                        authors.append(author_string)
+                    author = ';'.join(authors)
                 else:
                     author_string = author[0]
                     author_string = re.sub(r'(author)|(editor)','',author_string)
                     author_string = author_string.strip(" ,")
-                author = author_string
+                    author = author_string
                 author = author.title()
                 st.write('Author: ',author)
             if 'publisher' in data['items'][0]['volumeInfo']:
