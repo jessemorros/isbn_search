@@ -32,7 +32,7 @@ with st.container():
     st.write("ISBN Validator")
     isbn = st.text_input('Enter an isbn',label_visibility="hidden",placeholder='isbn')
     if il.is_isbn13(isbn):
-        st.write(isbn,'is a valid ISBN 13')
+        st.write(isbn,'is a valid ISBN 3')
     elif il.is_isbn10(isbn):
         st.write(isbn, 'is a valid ISBN 10')
         isbn13=il.to_isbn13(isbn)
