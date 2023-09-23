@@ -91,7 +91,7 @@ with st.form("loc_isbn_search"):
                         author_last = author_list[0].strip()
                         author_string = author_first + ' ' + author_last
                         authors.append(author_string)
-                        author = '; '.join(authors)
+                author = '; '.join(authors)
             else:
                 author_string = author[0]
                 author_string = re.sub(r'(author)|(editor)','',author_string)
@@ -148,7 +148,7 @@ with st.form("gb_isbn_search"):
                             author_string = author_string.strip(" ,")
                             author_string = author_string.split(',')
                             authors.append(author_string)
-                            author = '; '.join(authors)
+                    author = '; '.join(authors)
                 else:
                     author_string = author[0]
                     author_string = re.sub(r'(author)|(editor)','',author_string)
