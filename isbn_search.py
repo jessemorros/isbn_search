@@ -11,7 +11,7 @@ from requests.packages.urllib3.util.retry import Retry
 import re 
 import time
 import socket
-from isbnlib import * as il
+from isbnlib import *
 import itertools
 
 
@@ -33,16 +33,16 @@ with st.container():
     isbn = st.text_input('Enter an isbn',label_visibility="hidden",placeholder='isbn')
     if il.is_isbn13(isbn):
         st.write(isbn,'is a valid ISBN 3')
-    elif il.is_isbn10(isbn):
+    elif is_isbn10(isbn):
         st.write(isbn, 'is a valid ISBN 10')
-        isbn13=il.to_isbn13(isbn)
+        isbn13=to_isbn13(isbn)
         st.write(isbn,'as isbn 13: ',isbn13)
     else:
         st.write(isbn,'not valid')
         if len(isbn) == 13:
             if isbn.startswith('987'):
                 isbn_attempt = isbn.replace('987','978')
-                if il.is_isbn13(isbn_attempt):
+                if is_isbn13(isbn_attempt):
                     st.write('Try',isbn_attempt)
             else:
                 isbn_attempts = []
@@ -51,7 +51,7 @@ with st.container():
                 new_isbns = []
                 for permutation in isbn_last_4_permutations:
                     new_isbn = isbn[:-4] + "".join(permutation)
-                    if il.is_isbn13(new_isbn):
+                    if is_isbn13(new_isbn):
                         new_isbns.append(new_isbn)
                 new_isbns = ','.join(new_isbns)
                 st.write('Try one of these:',new_isbns)
