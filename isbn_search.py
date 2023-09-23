@@ -144,7 +144,7 @@ with st.form("gb_isbn_search"):
                     for i in author:
                         author_string = i
                         authors.append(author_string)
-                    author = ';'.join(authors)
+                    author = '; '.join(authors)
                 else:
                     author_string = author[0]
                     author_string = re.sub(r'(author)|(editor)','',author_string)
