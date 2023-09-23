@@ -163,6 +163,9 @@ with st.form("gb_isbn_search"):
                 year = data['items'][0]['volumeInfo']['publishedDate']
                 year = year[:4]
                 st.write('Copyright Date: ',year)
+            if 'canonicalVolumeLink' in data['items'][0]['volumeInfo']:
+                site = data['items'][0]['volumeInfo']['canonicalVolumeLink']
+                st.write('Google books: ',site)
         else:
             st.write('No results found for ',isbn)
         with st.expander('json',expanded=False):
