@@ -130,7 +130,7 @@ with st.form("gb_isbn_search"):
     isbn = st.text_input('Enter an isbn',label_visibility="hidden",placeholder='isbn')
     submitted = st.form_submit_button("Search")
     if submitted:
-        url = 'https://www.googleapis.com/books/v1/volumes?q=isbn:'+isbn
+        url = 'https://www.googleapis.com/books/v1/volumes?q=isbn:'+isbn+'&country=US'
         response = requests.get(url)
         data = response.json()
         if 'items' in data:
