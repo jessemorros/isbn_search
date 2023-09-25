@@ -1,2 +1,3 @@
 ﻿beautifulsoup4
+lxml
 git+https://github.com/xlcnd/isbnlib
