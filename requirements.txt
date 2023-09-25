@@ -1,1 +1,1 @@
-isbnlib==3.10.14 
+git+https://github.com/xlcnd/isbnlib

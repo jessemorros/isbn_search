@@ -7,7 +7,7 @@ st.set_page_config(
 import streamlit.components.v1 as components
 import requests
 from requests.adapters import HTTPAdapter
-from requests.packages.urllib3.util.retry import Retry
+from urllib3.util import Retry
 import re 
 import time
 import socket
@@ -31,8 +31,8 @@ st.sidebar.markdown('''
 with st.expander(label="ISBN Validator",expanded=False):
     st.write("ISBN Validator")
     isbn = st.text_input('Enter an isbn',label_visibility="hidden",placeholder='isbn')
-    if il.is_isbn13(isbn):
-        st.write(isbn,'is a valid ISBN 3')
+    if is_isbn13(isbn):
+        st.write(isbn,'is a valid ISBN 13')
     elif is_isbn10(isbn):
         st.write(isbn, 'is a valid ISBN 10')
         isbn13=to_isbn13(isbn)
