@@ -13,7 +13,9 @@ import time
 import socket
 from isbnlib import *
 import itertools
-
+import pandas as pd
+from bs4 import BeautifulSoup
+import lxml
 
 
 # side bar navigation 
@@ -28,33 +30,84 @@ st.sidebar.markdown('''
 
 
 # main page
-with st.expander(label="ISBN Validator",expanded=False):
-    st.write("ISBN Validator")
+with st.container():
+    st.write("Google books search")
     isbn = st.text_input('Enter an isbn',label_visibility="hidden",placeholder='isbn')
+    new_isbns = []
     if is_isbn13(isbn):
         st.write(isbn,'is a valid ISBN 13')
+        new_isbns.append(isbn)
     elif is_isbn10(isbn):
         st.write(isbn, 'is a valid ISBN 10')
         isbn13=to_isbn13(isbn)
         st.write(isbn,'as isbn 13: ',isbn13)
+        new_isbns.append(isbn13)
     else:
-        st.write(isbn,'not valid')
+        st.write(isbn,'not valid. Try one of these:')
         if len(isbn) == 13:
             if isbn.startswith('987'):
                 isbn_attempt = isbn.replace('987','978')
                 if is_isbn13(isbn_attempt):
-                    st.write('Try',isbn_attempt)
+                    new_isbns.append(isbn_attempt)
             else:
                 isbn_attempts = []
                 isbn_last_4 = isbn[-4:]
                 isbn_last_4_permutations = itertools.permutations(isbn_last_4)
-                new_isbns = []
+                
                 for permutation in isbn_last_4_permutations:
                     new_isbn = isbn[:-4] + "".join(permutation)
                     if is_isbn13(new_isbn):
                         new_isbns.append(new_isbn)
-                new_isbns = ','.join(new_isbns)
-                st.write('Try one of these:',new_isbns)
+    new_isbns = list(set(new_isbns))
+    for isbn in new_isbns:
+        isbn = isbn.strip()
+        with st.expander(label=isbn,expanded=False):
+            url = 'https://www.googleapis.com/books/v1/volumes?q=isbn:'+isbn+'&country=US'
+            response = requests.get(url)
+            data = response.json()
+            if 'items' in data:
+                metadata= {'isbn':isbn}
+                if 'canonicalVolumeLink' in data['items'][0]['volumeInfo']:
+                    gb_page = data['items'][0]['volumeInfo']['canonicalVolumeLink']                    
+                if 'imageLinks' in data['items'][0]['volumeInfo']:
+                    cover_image = data['items'][0]['volumeInfo']['imageLinks']['thumbnail']
+                    
+                    st.markdown(
+                        '''
+                        [![Foo](''' + cover_image + ''')]('''+gb_page+''')
+                        ''')
+                else:
+                    st.markdown(''' 
+                        [no cover image]('''+gb_page+''')
+                    ''')      
+                if 'title' in data['items'][0]['volumeInfo']:
+                    book_title = data['items'][0]['volumeInfo']['title']
+                    book_title = book_title.title()
+                    metadata['title'] = book_title                    
+                if 'authors' in data['items'][0]['volumeInfo']:
+                    author = data['items'][0]['volumeInfo']['authors']
+                    if len(author) > 1:
+                        authors = []
+                        for i in author:
+                            author_string = i
+                            authors.append(author_string)
+                        author = '; '.join(authors)
+                    else:
+                        author_string = author[0]
+                        author_string = re.sub(r'(author)|(editor)','',author_string)
+                        author_string = author_string.strip(" ,")
+                        author = author_string
+                    author = author.title()
+                    metadata['author'] = author
+                if 'publisher' in data['items'][0]['volumeInfo']:
+                    publisher = data['items'][0]['volumeInfo']['publisher']
+                    metadata['publisher'] = publisher
+                if 'publishedDate' in data['items'][0]['volumeInfo']:
+                    year = data['items'][0]['volumeInfo']['publishedDate']
+                    year = year[:4]
+                    metadata['copyright date'] = year
+                df = pd.DataFrame.from_dict(metadata,orient='index')                
+                st.table(df)
 
 
 with st.expander(label="custom google search of publisher websites",expanded=False):
@@ -94,7 +147,36 @@ def get_results(isbn):
     else:
         results = []
     return results
-
+@st.cache_data
+def get_loc_isbns(lccn):
+    lccn = results[0]['number_lccn'][0]
+    marc = 'https://lccn.loc.gov/'+lccn+'/marcxml'
+    session = requests.Session()
+    retry = Retry(connect=3, backoff_factor=1)
+    adapter = HTTPAdapter(max_retries=retry)
+    session.mount('http://', adapter)
+    session.mount('https://', adapter)
+    response = session.get(marc)
+    time.sleep(1)
+    soup = BeautifulSoup(response.content, "lxml")
+    isbns = soup.find_all('datafield', tag="020")
+    return isbns
+@st.cache_data
+def sort_isbns(isbns):
+    alt_isbns = []
+    for isbn in isbns:
+        alt = isbn.findAll('subfield')
+        if len(alt) > 1:
+            alt_isbn = alt[0].text
+            isbn_format = alt[1].text
+            alt_isbn_dict = {'format':isbn_format, 'alt_isbn':alt_isbn}
+            alt_isbns.append(alt_isbn_dict)
+        else:
+            alt_isbn = alt[0].text
+            isbn_format = 'alt_isbn'
+            alt_isbn_dict = {'format':isbn_format, 'alt_isbn':alt_isbn}
+            alt_isbns.append(alt_isbn_dict)
+    return alt_isbns
 
 with st.form("loc_isbn_search"):
     st.write("Search the Library of Congress catalog")
@@ -103,6 +185,7 @@ with st.form("loc_isbn_search"):
     if submitted:
         results = get_results(isbn)
         if len(results) > 0:
+            metadata= {'isbn':isbn}
             book_title = results[0]['item']['title']
             book_title = book_title.title()
             author = results[0]['item']['contributors']
@@ -137,60 +220,31 @@ with st.form("loc_isbn_search"):
             publisher = publisher.title()
             year = publishing[-4:]
             marc = results[0]['id']
+            lccn = results[0]['number_lccn'][0]
+            isbns = get_loc_isbns(lccn)
+            isbns = sort_isbns(isbns)            
             catalog_page = results[0]['aka'][1]            
-            st.write('Title: ',book_title)
-            st.write('Author: ',author)
-            st.write('Publisher: ',publisher)
-            st.write('Copyright Date: ',year)
-            st.write()
+            metadata['title'] = book_title
+            metadata['author'] = author
+            metadata['publisher'] = publisher
+            metadata['copyright year'] = year
+            for isbn_pair in isbns:
+                for key,value in isbn_pair.items():
+                    if key == 'format':
+                        isbn_format = value
+                        isbn_format = isbn_format.strip(" ()'") 
+                        format_label = isbn_format + ' isbn:'
+                    if key == 'alt_isbn':
+                        alt_isbn = value
+                        metadata[format_label] = alt_isbn                
             st.write('MARC record: ',marc)
             st.write('Library of Congress catalog: ',catalog_page)
-
+            df = pd.DataFrame.from_dict(metadata,orient='index')                
+            st.table(df)
         else:
             st.write('No results found for ',isbn)
         with st.expander('json',expanded=False):
             st.json(results)
 
 
-with st.form("gb_isbn_search"):
-    st.write("Search Google Books")
-    isbn = st.text_input('Enter an isbn',label_visibility="hidden",placeholder='isbn')
-    submitted = st.form_submit_button("Search")
-    if submitted:
-        url = 'https://www.googleapis.com/books/v1/volumes?q=isbn:'+isbn+'&country=US'
-        response = requests.get(url)
-        data = response.json()
-        if 'items' in data:
-            if 'title' in data['items'][0]['volumeInfo']:
-                book_title = data['items'][0]['volumeInfo']['title']
-                st.write('Title: ',book_title)
-            if 'authors' in data['items'][0]['volumeInfo']:
-                author = data['items'][0]['volumeInfo']['authors']
-                if len(author) > 1:
-                    authors = []
-                    for i in author:
-                        author_string = i
-                        authors.append(author_string)
-                    author = '; '.join(authors)
-                else:
-                    author_string = author[0]
-                    author_string = re.sub(r'(author)|(editor)','',author_string)
-                    author_string = author_string.strip(" ,")
-                    author = author_string
-                author = author.title()
-                st.write('Author: ',author)
-            if 'publisher' in data['items'][0]['volumeInfo']:
-                publisher = data['items'][0]['volumeInfo']['publisher']
-                st.write('Publisher: ',publisher)
-            if 'publishedDate' in data['items'][0]['volumeInfo']:
-                year = data['items'][0]['volumeInfo']['publishedDate']
-                year = year[:4]
-                st.write('Copyright Date: ',year)
-            if 'canonicalVolumeLink' in data['items'][0]['volumeInfo']:
-                site = data['items'][0]['volumeInfo']['canonicalVolumeLink']
-                st.write('Google books: ',site)
-        else:
-            st.write('No results found for ',isbn)
-        with st.expander('json',expanded=False):
-            st.json(data)
 
