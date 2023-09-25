@@ -108,6 +108,8 @@ with st.container():
                     metadata['copyright date'] = year
                 df = pd.DataFrame.from_dict(metadata,orient='index')                
                 st.table(df)
+            else:
+                st.write('No metadata found for :isbn')
 
 
 with st.expander(label="custom google search of publisher websites",expanded=False):
