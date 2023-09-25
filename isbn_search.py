@@ -131,7 +131,7 @@ with st.expander(label="custom google search of publisher websites",expanded=Fal
             """,
         height=400, scrolling=True
             )
-@st.cache_data
+
 def get_results(isbn):
     url = 'https://www.loc.gov/search/?q='+isbn+'&fo=json'
     session = requests.Session()
@@ -147,7 +147,7 @@ def get_results(isbn):
     else:
         results = []
     return results
-@st.cache_data
+
 def get_loc_isbns(lccn):
     lccn = results[0]['number_lccn'][0]
     marc = 'https://lccn.loc.gov/'+lccn+'/marcxml'
@@ -161,7 +161,7 @@ def get_loc_isbns(lccn):
     soup = BeautifulSoup(response.content, "lxml")
     isbns = soup.find_all('datafield', tag="020")
     return isbns
-@st.cache_data
+
 def sort_isbns(isbns):
     alt_isbns = []
     for isbn in isbns:
