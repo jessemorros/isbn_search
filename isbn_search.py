@@ -109,7 +109,7 @@ with st.container():
                 df = pd.DataFrame.from_dict(metadata,orient='index')                
                 st.table(df)
             else:
-                st.write('No metadata found for :isbn')
+                st.write('No metadata found for :',isbn)
 
 
 with st.expander(label="custom google search of publisher websites",expanded=False):
