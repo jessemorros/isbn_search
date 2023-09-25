@@ -28,7 +28,7 @@ st.sidebar.markdown('''
 
 
 # main page
-with st.container():
+with st.expander(label="ISBN Validator",expanded=False):
     st.write("ISBN Validator")
     isbn = st.text_input('Enter an isbn',label_visibility="hidden",placeholder='isbn')
     if il.is_isbn13(isbn):
