@@ -1,1 +1,1 @@
-isbnlib
+git+https://github.com/xlcnd/isbnlib/tree/ddc62f2b77214205a7413b5d049c2a008c5271d4/isbnlib
