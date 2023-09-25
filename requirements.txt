@@ -1,2 +1,2 @@
 git+https://github.com/xlcnd/isbnlib
-﻿beautifulsoup4==4.12.2
+﻿beautifulsoup4
