@@ -1,1 +1,1 @@
-git+https://github.com/xlcnd/isbnlib#egg=isbnlib
+isbnlib==3.10.14 
