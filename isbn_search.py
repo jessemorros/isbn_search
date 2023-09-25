@@ -11,7 +11,7 @@ from requests.packages.urllib3.util.retry import Retry
 import re 
 import time
 import socket
-from isbnlib import *
+# from isbnlib import *
 import itertools
 
 
